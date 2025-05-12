@@ -6,11 +6,20 @@ import {
   Column,
 } from 'typeorm';
 import { EntityRelationalHelper } from '../../../../../utils/relational-entity-helper';
+import { TaskState } from '../../../../domain/task-state.enum';
 
 @Entity({
   name: 'task',
 })
 export class TaskEntity extends EntityRelationalHelper {
+  @Column({
+    nullable: false,
+    type: 'enum',
+    enum: TaskState,
+    default: TaskState.CheckPending,
+  })
+  taskState: TaskState;
+
   @Column({
     nullable: true,
     type: Number,
@@ -21,7 +30,7 @@ export class TaskEntity extends EntityRelationalHelper {
     nullable: true,
     type: Date,
   })
-  executeAt?: Date | null;
+  executedAt?: Date | null;
 
   @Column({
     nullable: true,

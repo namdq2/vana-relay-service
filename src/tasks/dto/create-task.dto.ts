@@ -5,6 +5,7 @@ import {
   IsString,
   IsOptional,
   IsDate,
+  IsEnum,
 } from 'class-validator';
 
 import {
@@ -18,7 +19,18 @@ import {
   Transform,
 } from 'class-transformer';
 
+import { TaskState } from '../domain/task-state.enum';
+
 export class CreateTaskDto {
+  @ApiProperty({
+    required: true,
+    enum: TaskState,
+    enumName: 'TaskState',
+    default: TaskState.CheckPending,
+  })
+  @IsEnum(TaskState)
+  taskState: TaskState;
+
   @ApiProperty({
     required: false,
     type: () => Number,
@@ -34,7 +46,7 @@ export class CreateTaskDto {
   @IsOptional()
   @Transform(({ value }) => new Date(value))
   @IsDate()
-  executeAt?: Date | null;
+  executedAt?: Date | null;
 
   @ApiProperty({
     required: false,

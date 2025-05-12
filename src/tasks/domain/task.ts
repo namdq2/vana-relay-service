@@ -1,6 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { TaskState } from './task-state.enum';
 
 export class Task {
+  @ApiProperty({
+    enum: TaskState,
+    enumName: 'TaskState',
+    default: TaskState.CheckPending,
+  })
+  taskState: TaskState;
+
   @ApiProperty({
     type: () => Number,
     nullable: true,
@@ -11,7 +19,7 @@ export class Task {
     type: () => Date,
     nullable: true,
   })
-  executeAt?: Date | null;
+  executedAt?: Date | null;
 
   @ApiProperty({
     type: () => String,
