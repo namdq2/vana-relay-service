@@ -13,14 +13,14 @@ import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import {
-  ApiBearerAuth,
   ApiCreatedResponse,
+  ApiHeader,
   ApiOkResponse,
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
 import { Task } from './domain/task';
-import { AuthGuard } from '@nestjs/passport';
+import { ApiKeyGuard } from '../auth/api-key.guard';
 import {
   InfinityPaginationResponse,
   InfinityPaginationResponseDto,
@@ -29,8 +29,12 @@ import { infinityPagination } from '../utils/infinity-pagination';
 import { FindAllTasksDto } from './dto/find-all-tasks.dto';
 
 @ApiTags('Tasks')
-@ApiBearerAuth()
-@UseGuards(AuthGuard('jwt'))
+@ApiHeader({
+  name: 'x-api-key',
+  description: 'API Key for authentication',
+  required: true,
+})
+@UseGuards(ApiKeyGuard)
 @Controller({
   path: 'tasks',
   version: '1',

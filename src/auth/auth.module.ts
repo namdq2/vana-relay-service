@@ -11,6 +11,7 @@ import { SessionModule } from '../session/session.module';
 import { UsersModule } from '../users/users.module';
 import { ApiKeyStrategy } from './strategies/api-key.strategy';
 import { ApiKeysModule } from '../api-keys/api-keys.module';
+import { ApiKeyGuard } from './api-key.guard';
 
 @Module({
   imports: [
@@ -28,7 +29,8 @@ import { ApiKeysModule } from '../api-keys/api-keys.module';
     JwtRefreshStrategy,
     AnonymousStrategy,
     ApiKeyStrategy,
+    ApiKeyGuard,
   ],
-  exports: [AuthService],
+  exports: [AuthService, ApiKeyGuard],
 })
 export class AuthModule {}
