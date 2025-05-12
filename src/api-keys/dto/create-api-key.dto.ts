@@ -48,20 +48,6 @@ export class CreateApiKeyDto {
     type: () => String,
   })
   @IsString()
-  keyHint: string;
-
-  @ApiProperty({
-    required: true,
-    type: () => String,
-  })
-  @IsString()
-  keyHash: string;
-
-  @ApiProperty({
-    required: true,
-    type: () => String,
-  })
-  @IsString()
   name: string;
 
   // Don't forget to use the class-validator decorators in the DTO properties.
