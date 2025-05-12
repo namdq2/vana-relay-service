@@ -3,6 +3,18 @@ import { TaskState } from './task-state.enum';
 
 export class Task {
   @ApiProperty({
+    type: () => String,
+    nullable: true,
+  })
+  lastCheckedMessage?: string | null;
+
+  @ApiProperty({
+    type: () => Date,
+    nullable: true,
+  })
+  lastCheckedAt?: Date | null;
+
+  @ApiProperty({
     enum: TaskState,
     enumName: 'TaskState',
     default: TaskState.CheckPending,

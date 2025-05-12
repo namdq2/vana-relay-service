@@ -5,6 +5,10 @@ import { TaskEntity } from '../entities/task.entity';
 export class TaskMapper {
   static toDomain(raw: TaskEntity): Task {
     const domainEntity = new Task();
+    domainEntity.lastCheckedMessage = raw.lastCheckedMessage;
+
+    domainEntity.lastCheckedAt = raw.lastCheckedAt;
+
     domainEntity.taskState = raw.taskState;
 
     domainEntity.blockNumber = raw.blockNumber;
@@ -24,6 +28,10 @@ export class TaskMapper {
 
   static toPersistence(domainEntity: Task): TaskEntity {
     const persistenceEntity = new TaskEntity();
+    persistenceEntity.lastCheckedMessage = domainEntity.lastCheckedMessage;
+
+    persistenceEntity.lastCheckedAt = domainEntity.lastCheckedAt;
+
     persistenceEntity.taskState = domainEntity.taskState;
 
     persistenceEntity.blockNumber = domainEntity.blockNumber;

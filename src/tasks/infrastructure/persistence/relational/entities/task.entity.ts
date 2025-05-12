@@ -13,6 +13,18 @@ import { TaskState } from '../../../../domain/task-state.enum';
 })
 export class TaskEntity extends EntityRelationalHelper {
   @Column({
+    nullable: true,
+    type: String,
+  })
+  lastCheckedMessage?: string | null;
+
+  @Column({
+    nullable: true,
+    type: Date,
+  })
+  lastCheckedAt?: Date | null;
+
+  @Column({
     nullable: false,
     type: 'enum',
     enum: TaskState,

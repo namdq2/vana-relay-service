@@ -23,6 +23,23 @@ import { TaskState } from '../domain/task-state.enum';
 
 export class CreateTaskDto {
   @ApiProperty({
+    required: false,
+    type: () => String,
+  })
+  @IsOptional()
+  @IsString()
+  lastCheckedMessage?: string | null;
+
+  @ApiProperty({
+    required: false,
+    type: () => Date,
+  })
+  @IsOptional()
+  @Transform(({ value }) => new Date(value))
+  @IsDate()
+  lastCheckedAt?: Date | null;
+
+  @ApiProperty({
     required: true,
     enum: TaskState,
     enumName: 'TaskState',

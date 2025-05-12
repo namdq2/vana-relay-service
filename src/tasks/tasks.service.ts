@@ -22,6 +22,10 @@ export class TasksService {
     return this.taskRepository.create({
       // Do not remove comment below.
       // <creating-property-payload />
+      lastCheckedMessage: createTaskDto.lastCheckedMessage,
+
+      lastCheckedAt: createTaskDto.lastCheckedAt,
+
       taskState: createTaskDto.taskState,
 
       blockNumber: createTaskDto.blockNumber,
@@ -66,6 +70,10 @@ export class TasksService {
     return this.taskRepository.update(id, {
       // Do not remove comment below.
       // <updating-property-payload />
+      lastCheckedMessage: updateTaskDto.lastCheckedMessage,
+
+      lastCheckedAt: updateTaskDto.lastCheckedAt,
+
       taskState: updateTaskDto.taskState,
 
       blockNumber: updateTaskDto.blockNumber,
