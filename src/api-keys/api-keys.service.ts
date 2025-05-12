@@ -8,13 +8,22 @@ import { ApiKeyRepository } from './infrastructure/persistence/api-key.repositor
 import { IPaginationOptions } from '../utils/types/pagination-options';
 import { ApiKey } from './domain/api-key';
 import * as crypto from 'crypto';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class ApiKeysService {
+  private readonly secretKey: string;
+
   constructor(
     // Dependencies here
     private readonly apiKeyRepository: ApiKeyRepository,
-  ) {}
+    private readonly configService: ConfigService,
+  ) {
+    // Get a secret key from config or generate one if not available
+    this.secretKey =
+      this.configService.get<string>('API_KEY_SECRET', { infer: true }) ||
+      crypto.randomBytes(32).toString('hex');
+  }
 
   generateApiKey(): { fullKey: string; prefix: string; hash: string } {
     // Format: prefix_randomPart (e.g., abc12345_f7d8a9b3c...)
@@ -28,8 +37,11 @@ export class ApiKeysService {
 
     const fullKey = `${prefix}_${randomPart}`;
 
-    // Hash the key for storage
-    const hash = crypto.createHash('sha256').update(fullKey).digest('hex');
+    // Use HMAC-SHA256 for more secure hashing
+    const hash = crypto
+      .createHmac('sha256', this.secretKey)
+      .update(fullKey)
+      .digest('hex');
 
     return { fullKey, prefix, hash };
   }
@@ -106,5 +118,39 @@ export class ApiKeysService {
 
   remove(id: ApiKey['id']) {
     return this.apiKeyRepository.remove(id);
+  }
+
+  async validateApiKey(apiKey: string): Promise<boolean> {
+    if (!apiKey) {
+      return false;
+    }
+
+    const parts = apiKey.split('_');
+    if (parts.length !== 2) {
+      return false;
+    }
+
+    // Use HMAC-SHA256 for validation, same as in generation
+    const hash = crypto
+      .createHmac('sha256', this.secretKey)
+      .update(apiKey)
+      .digest('hex');
+
+    // Query the database directly with the prefix and hash
+    const apiKeyEntity = await this.apiKeyRepository.findByKeyHash(
+      hash,
+      true, // Only active keys
+    );
+
+    if (!apiKeyEntity) {
+      return false;
+    }
+
+    // Check if the API key has expired
+    if (apiKeyEntity.expiresAt && new Date() > apiKeyEntity.expiresAt) {
+      return false;
+    }
+
+    return true;
   }
 }

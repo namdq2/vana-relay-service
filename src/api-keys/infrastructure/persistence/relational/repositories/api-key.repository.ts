@@ -76,4 +76,23 @@ export class ApiKeyRelationalRepository implements ApiKeyRepository {
   async remove(id: ApiKey['id']): Promise<void> {
     await this.apiKeyRepository.delete(id);
   }
+
+  async findByKeyHash(
+    keyHash: string,
+    isActive?: boolean,
+  ): Promise<NullableType<ApiKey>> {
+    const whereCondition: any = {
+      keyHash,
+    };
+
+    if (isActive !== undefined) {
+      whereCondition.isActive = isActive;
+    }
+
+    const entity = await this.apiKeyRepository.findOne({
+      where: whereCondition,
+    });
+
+    return entity ? ApiKeyMapper.toDomain(entity) : null;
+  }
 }

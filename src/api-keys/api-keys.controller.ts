@@ -15,6 +15,7 @@ import { UpdateApiKeyDto } from './dto/update-api-key.dto';
 import {
   ApiBearerAuth,
   ApiCreatedResponse,
+  ApiHeader,
   ApiOkResponse,
   ApiParam,
   ApiTags,
@@ -30,6 +31,7 @@ import { FindAllApiKeysDto } from './dto/find-all-api-keys.dto';
 import { Roles } from '../roles/roles.decorator';
 import { RoleEnum } from '../roles/roles.enum';
 import { RolesGuard } from '../roles/roles.guard';
+import { ApiKeyGuard } from '../auth/api-key.guard';
 
 @ApiTags('Apikeys')
 @ApiBearerAuth()
@@ -108,5 +110,24 @@ export class ApiKeysController {
   })
   remove(@Param('id') id: string) {
     return this.apiKeysService.remove(id);
+  }
+
+  @Get('validate')
+  @UseGuards(ApiKeyGuard)
+  @ApiHeader({
+    name: 'x-api-key',
+    description: 'API Key for authentication',
+    required: true,
+  })
+  @ApiOkResponse({
+    schema: {
+      type: 'object',
+      properties: {
+        valid: { type: 'boolean' },
+      },
+    },
+  })
+  validateApiKey() {
+    return { valid: true };
   }
 }

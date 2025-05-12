@@ -24,4 +24,9 @@ export abstract class ApiKeyRepository {
   ): Promise<ApiKey | null>;
 
   abstract remove(id: ApiKey['id']): Promise<void>;
+
+  abstract findByKeyHash(
+    keyHash: string,
+    isActive?: boolean,
+  ): Promise<NullableType<ApiKey>>;
 }
