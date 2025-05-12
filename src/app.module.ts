@@ -26,8 +26,11 @@ const infrastructureDatabaseModule = TypeOrmModule.forRootAsync({
   },
 });
 
+import { TasksModule } from './tasks/tasks.module';
+
 @Module({
   imports: [
+    TasksModule,
     ConfigModule.forRoot({
       isGlobal: true,
       load: [databaseConfig, authConfig, appConfig, mailConfig, fileConfig],
