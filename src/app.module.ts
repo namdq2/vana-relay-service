@@ -28,8 +28,11 @@ const infrastructureDatabaseModule = TypeOrmModule.forRootAsync({
 
 import { TasksModule } from './tasks/tasks.module';
 
+import { ApiKeysModule } from './api-keys/api-keys.module';
+
 @Module({
   imports: [
+    ApiKeysModule,
     TasksModule,
     ConfigModule.forRoot({
       isGlobal: true,
