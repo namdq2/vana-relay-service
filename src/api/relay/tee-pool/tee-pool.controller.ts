@@ -8,6 +8,7 @@ import {
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { TeePoolContractService } from '../../../blockchain/contracts/services';
 import { RequestProofDto } from './dto';
+import { TransactionResponse } from '../../common/interfaces';
 
 @ApiTags('TEE Pool')
 @Controller('api/relay/tee-pool')

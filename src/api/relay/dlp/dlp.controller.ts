@@ -8,6 +8,7 @@ import {
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { DlpContractService } from '../../../blockchain/contracts/services';
 import { RequestRewardDto } from './dto';
+import { TransactionResponse } from '../../common/interfaces';
 
 @ApiTags('DLP')
 @Controller('api/relay/dlp')

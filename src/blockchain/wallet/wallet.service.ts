@@ -25,14 +25,15 @@ export class WalletService {
         'Environment variable for encryption key not set: WALLET_ENCRYPTION_KEY_ENV_VAR',
       );
     }
+
     const encryptionKey = process.env[encryptionKeyEnvVar];
     if (!encryptionKey) {
       throw new Error(
         `Encryption key not found in environment variable: ${encryptionKeyEnvVar}`,
       );
     }
-    this.encryptionKey = encryptionKey;
 
+    this.encryptionKey = encryptionKey;
     if (!this.encryptionKey) {
       throw new Error(
         `Encryption key not found in environment variable: ${encryptionKeyEnvVar}`,
