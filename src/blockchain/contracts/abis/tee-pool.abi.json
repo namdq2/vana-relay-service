@@ -1,0 +1,31 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "contributorAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "string",
+        "name": "dataId",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "contributionHash",
+        "type": "string"
+      }
+    ],
+    "name": "requestContributionProof",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "success",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]

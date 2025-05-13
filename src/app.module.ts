@@ -7,6 +7,9 @@ import authConfig from './auth/config/auth.config';
 import appConfig from './config/app.config';
 import mailConfig from './mail/config/mail.config';
 import fileConfig from './files/config/file.config';
+import blockchainConfig from './blockchain/config/blockchain.config';
+import { BlockchainModule } from './blockchain/blockchain.module';
+import { RelayModule } from './api/relay/relay.module';
 import path from 'path';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -36,7 +39,14 @@ import { ApiKeysModule } from './api-keys/api-keys.module';
     TasksModule,
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [databaseConfig, authConfig, appConfig, mailConfig, fileConfig],
+      load: [
+        databaseConfig,
+        authConfig,
+        appConfig,
+        mailConfig,
+        fileConfig,
+        blockchainConfig,
+      ],
       envFilePath: ['.env'],
     }),
     infrastructureDatabaseModule,
@@ -70,6 +80,8 @@ import { ApiKeysModule } from './api-keys/api-keys.module';
     MailModule,
     MailerModule,
     HomeModule,
+    BlockchainModule,
+    RelayModule,
   ],
 })
 export class AppModule {}

@@ -1,0 +1,41 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "fileId",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "fileHash",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "fileSize",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "fileType",
+        "type": "string"
+      },
+      {
+        "internalType": "address[]",
+        "name": "permissionedUsers",
+        "type": "address[]"
+      }
+    ],
+    "name": "addFileWithPermission",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "success",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]
