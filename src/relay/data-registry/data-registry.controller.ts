@@ -6,12 +6,12 @@ import {
   HttpException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { DataRegistryContractService } from '../../../blockchain/contracts/services';
+import { DataRegistryContractService } from '../../blockchain/contracts/services';
 import { AddFileDto } from './dto';
-import { TransactionResponse } from '../../common/interfaces';
+import { TransactionResponse } from '../common/interfaces';
 
 @ApiTags('Data Registry')
-@Controller('api/relay/data-registry')
+@Controller('relay/data-registry')
 export class DataRegistryController {
   constructor(
     private readonly dataRegistryContractService: DataRegistryContractService,

@@ -9,7 +9,7 @@ import mailConfig from './mail/config/mail.config';
 import fileConfig from './files/config/file.config';
 import blockchainConfig from './blockchain/config/blockchain.config';
 import { BlockchainModule } from './blockchain/blockchain.module';
-import { RelayModule } from './api/relay/relay.module';
+import { RelayModule } from './relay/relay.module';
 import path from 'path';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
