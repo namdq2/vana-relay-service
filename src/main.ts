@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import {
   ClassSerializerInterceptor,
+  Logger,
   ValidationPipe,
   VersioningType,
 } from '@nestjs/common';
@@ -54,6 +55,10 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('docs', app, document);
 
-  await app.listen(configService.getOrThrow('app.port', { infer: true }));
+  const port = configService.getOrThrow('app.port', { infer: true });
+  await app.listen(port);
+
+  Logger.log(`Server is running on http://localhost:${port}`);
+  Logger.log(`Swagger is running on http://localhost:${port}/docs`);
 }
 void bootstrap();
