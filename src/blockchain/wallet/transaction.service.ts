@@ -99,7 +99,10 @@ export class TransactionService {
       this.pendingTransactions.set(txResponse.hash, txResponse);
 
       // Wait for transaction confirmation in the background
-      await this.waitForConfirmation(txResponse.hash);
+      const txResult = await this.waitForConfirmation(txResponse.hash);
+      if (!txResult.success) {
+        throw new Error(`Transaction failed: ${txResult.error}`);
+      }
 
       return txResponse.hash;
     } catch (error) {
@@ -232,11 +235,66 @@ export class TransactionService {
   }
 
   /**
+   * Extract revert reason from transaction error
+   *
+   * @param error - Error from transaction
+   * @returns Extracted revert reason
+   */
+  private extractRevertReason(error: any): string {
+    try {
+      // Check if error has data property (typical for revert errors)
+      if (error.data) {
+        return `Revert reason: ${error.data}`;
+      }
+
+      // Check for specific error formats
+      if (error.reason) {
+        return `Revert reason: ${error.reason}`;
+      }
+
+      // For errors that contain nested error data
+      if (error.error && error.error.data) {
+        // Try to decode the error data if it's a hex string
+        const errorData = error.error.data;
+
+        if (typeof errorData === 'string' && errorData.startsWith('0x')) {
+          // Remove the function selector (first 4 bytes / 10 characters including 0x)
+          const strippedData = errorData.slice(10);
+
+          try {
+            // Try to decode as a UTF-8 string (common for revert messages)
+            const decoded = ethers.utils.toUtf8String('0x' + strippedData);
+            if (decoded && decoded.length > 0) {
+              return `Revert reason: ${decoded}`;
+            }
+          } catch {
+            // If decoding as UTF-8 fails, just return the hex data
+            return `Revert data: ${errorData}`;
+          }
+        }
+
+        return `Revert data: ${JSON.stringify(errorData)}`;
+      }
+
+      // If we can't extract a specific reason, return the error message
+      return error.message || 'Unknown error';
+    } catch {
+      // If error parsing fails, return the original error message
+      return error.message || 'Unknown error';
+    }
+  }
+
+  /**
    * Wait for transaction confirmation and handle result
    *
    * @param txHash - Transaction hash
+   * @returns Promise that resolves to success object or error information
    */
-  private async waitForConfirmation(txHash: string): Promise<void> {
+  private async waitForConfirmation(txHash: string): Promise<{
+    success: boolean;
+    error?: string;
+    receipt?: ethers.providers.TransactionReceipt;
+  }> {
     try {
       const tx = this.pendingTransactions.get(txHash);
 
@@ -244,7 +302,10 @@ export class TransactionService {
         this.logger.warn(
           `Transaction ${txHash} not found in pending transactions`,
         );
-        return;
+        return {
+          success: false,
+          error: `Transaction ${txHash} not found in pending transactions`,
+        };
       }
 
       // Wait for confirmation
@@ -256,13 +317,24 @@ export class TransactionService {
       this.logger.log(
         `Transaction ${txHash} confirmed in block ${receipt.blockNumber}`,
       );
+      return {
+        success: true,
+        receipt,
+      };
     } catch (error) {
       this.logger.error(`Transaction ${txHash} failed: ${error.message}`);
 
       // Remove from pending transactions
       this.pendingTransactions.delete(txHash);
 
-      // Handle failed transaction (could implement retry logic here)
+      // Extract and return the revert reason
+      const revertReason = this.extractRevertReason(error);
+
+      // Return failure status with error message
+      return {
+        success: false,
+        error: revertReason,
+      };
     }
   }
 
