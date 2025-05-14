@@ -17,7 +17,7 @@ export class TeePoolController {
     private readonly teePoolContractService: TeePoolContractService,
   ) {}
 
-  @Post('request-proof')
+  @Post('request-contribution-proof')
   @ApiOperation({ summary: 'Request a contribution proof from the TEE Pool' })
   @ApiResponse({
     status: HttpStatus.CREATED,

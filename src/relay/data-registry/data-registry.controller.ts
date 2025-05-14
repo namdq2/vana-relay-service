@@ -17,7 +17,7 @@ export class DataRegistryController {
     private readonly dataRegistryContractService: DataRegistryContractService,
   ) {}
 
-  @Post('add-file')
+  @Post('add-file-with-permissions')
   @ApiOperation({ summary: 'Add a file to the registry with permissions' })
   @ApiResponse({
     status: HttpStatus.CREATED,
