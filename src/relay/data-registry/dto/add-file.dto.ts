@@ -1,61 +1,72 @@
 import {
   IsString,
-  IsNumber,
   IsArray,
   IsEthereumAddress,
   IsNotEmpty,
-  Min,
+  ValidateNested,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+
+/**
+ * DTO for permission object
+ */
+export class PermissionDto {
+  @ApiProperty({
+    description: 'Ethereum address of the account with permission',
+    example: '0x1234567890123456789012345678901234567890',
+  })
+  @IsString()
+  @IsEthereumAddress()
+  @IsNotEmpty()
+  account: string;
+
+  @ApiProperty({
+    description: 'Access key for the permission',
+    example: 'key-123456',
+  })
+  @IsString()
+  @IsNotEmpty()
+  key: string;
+}
 
 /**
  * DTO for adding a file to the Data Registry with permissions
  */
 export class AddFileDto {
   @ApiProperty({
-    description: 'Unique identifier for the file',
-    example: 'file-123456',
+    description: 'URL of the file',
+    example: 'https://example.com/files/file-123456',
   })
   @IsString()
   @IsNotEmpty()
-  fileId: string;
+  url: string;
 
   @ApiProperty({
-    description: 'Hash of the file content',
-    example:
-      '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+    description: 'Ethereum address of the file owner',
+    example: '0x1234567890123456789012345678901234567890',
   })
   @IsString()
+  @IsEthereumAddress()
   @IsNotEmpty()
-  fileHash: string;
+  ownerAddress: string;
 
   @ApiProperty({
-    description: 'Size of the file in bytes',
-    example: 1024,
-    minimum: 1,
-  })
-  @IsNumber()
-  @Min(1)
-  fileSize: number;
-
-  @ApiProperty({
-    description: 'Type/format of the file',
-    example: 'application/json',
-  })
-  @IsString()
-  @IsNotEmpty()
-  fileType: string;
-
-  @ApiProperty({
-    description:
-      'Array of user addresses who have permission to access the file',
+    description: 'Array of permission objects with account and key',
+    type: [PermissionDto],
     example: [
-      '0x1234567890123456789012345678901234567890',
-      '0x0987654321098765432109876543210987654321',
+      {
+        account: '0x1234567890123456789012345678901234567890',
+        key: 'key-123456',
+      },
+      {
+        account: '0x0987654321098765432109876543210987654321',
+        key: 'key-654321',
+      },
     ],
-    type: [String],
   })
   @IsArray()
-  @IsEthereumAddress({ each: true })
-  permissionedUsers: string[];
+  @ValidateNested({ each: true })
+  @Type(() => PermissionDto)
+  permissions: PermissionDto[];
 }

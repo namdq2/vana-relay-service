@@ -248,7 +248,7 @@ export class TransactionService {
       }
 
       // Wait for confirmation
-      const receipt = await tx.wait();
+      const receipt = await tx.wait(6);
 
       // Remove from pending transactions
       this.pendingTransactions.delete(txHash);

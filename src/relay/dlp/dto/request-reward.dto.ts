@@ -1,40 +1,28 @@
-import { IsString, IsEthereumAddress, IsNotEmpty } from 'class-validator';
+import { IsNumber, IsPositive } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 
 /**
  * DTO for requesting a reward for a data labeling contribution
  */
 export class RequestRewardDto {
   @ApiProperty({
-    description: 'Address of the contributor requesting the reward',
-    example: '0x1234567890123456789012345678901234567890',
+    description: 'ID of the file in the Data Registry',
+    example: 1,
+    type: Number,
   })
-  @IsEthereumAddress()
-  @IsNotEmpty()
-  contributorAddress: string;
+  @IsNumber()
+  @IsPositive()
+  @Type(() => Number)
+  fileId: number;
 
   @ApiProperty({
-    description: 'Identifier of the contribution',
-    example: 'contribution-123456',
+    description: 'Index of the proof in the contract',
+    example: 0,
+    type: Number,
   })
-  @IsString()
-  @IsNotEmpty()
-  contributionId: string;
-
-  @ApiProperty({
-    description: 'Hash of the proof of contribution',
-    example:
-      '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
-  })
-  @IsString()
-  @IsNotEmpty()
-  proofHash: string;
-
-  @ApiProperty({
-    description: 'Amount of tokens to be rewarded',
-    example: '1000000000000000000', // 1 token in wei
-  })
-  @IsString()
-  @IsNotEmpty()
-  rewardAmount: string;
+  @IsNumber()
+  @IsPositive()
+  @Type(() => Number)
+  proofIndex: number;
 }

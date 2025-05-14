@@ -39,8 +39,11 @@ export class DataRegistryController {
         metadata: {
           type: 'object',
           properties: {
-            fileId: { type: 'string', example: 'file123' },
-            fileType: { type: 'string', example: 'image/jpeg' },
+            url: {
+              type: 'string',
+              example: 'https://example.com/files/file-123456',
+            },
+            permissionsCount: { type: 'number', example: 2 },
           },
         },
       },
@@ -57,12 +60,10 @@ export class DataRegistryController {
   async addFile(@Body() addFileDto: AddFileDto): Promise<TransactionResponse> {
     try {
       const transactionHash =
-        await this.dataRegistryContractService.addFileWithPermission(
-          addFileDto.fileId,
-          addFileDto.fileHash,
-          addFileDto.fileSize,
-          addFileDto.fileType,
-          addFileDto.permissionedUsers,
+        await this.dataRegistryContractService.addFileWithPermissions(
+          addFileDto.url,
+          addFileDto.ownerAddress,
+          addFileDto.permissions,
         );
 
       return {
@@ -70,8 +71,8 @@ export class DataRegistryController {
         status: 'success',
         timestamp: new Date().toISOString(),
         metadata: {
-          fileId: addFileDto.fileId,
-          fileType: addFileDto.fileType,
+          url: addFileDto.url,
+          permissionsCount: addFileDto.permissions.length,
         },
       };
     } catch (error) {

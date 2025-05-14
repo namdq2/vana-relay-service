@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { BaseContractService } from './base-contract.service';
-import { IDataRegistryContract } from '../interfaces';
+import { IDataRegistryContract, Permission } from '../interfaces';
 import { dataRegistryAbi } from '../abis';
 import { BlockchainModuleConfig } from '../../config/blockchain-config.type';
 import { WalletService } from '../../wallet/wallet.service';
@@ -43,31 +43,25 @@ export class DataRegistryContractService
   /**
    * Adds a file to the registry with specified permissions
    *
-   * @param fileId - Unique identifier for the file
-   * @param fileHash - Hash of the file content
-   * @param fileSize - Size of the file in bytes
-   * @param fileType - Type/format of the file
-   * @param permissionedUsers - Array of user addresses who have permission to access the file
+   * @param url - URL of the file
+   * @param ownerAddress - Address of the file owner
+   * @param permissions - Array of permission objects with account and key
    * @returns Transaction hash
    */
-  async addFileWithPermission(
-    fileId: string,
-    fileHash: string,
-    fileSize: number,
-    fileType: string,
-    permissionedUsers: string[],
+  async addFileWithPermissions(
+    url: string,
+    ownerAddress: string,
+    permissions: Permission[],
   ): Promise<string> {
     this.logger.log(
-      `Adding file ${fileId} to registry with permissions for ${permissionedUsers.length} users`,
+      `Adding file with URL ${url} to registry with ${permissions.length} permissions`,
     );
 
     return this.sendTransaction(
-      'addFileWithPermission',
-      fileId,
-      fileHash,
-      fileSize,
-      fileType,
-      permissionedUsers,
+      'addFileWithPermissions',
+      url,
+      ownerAddress,
+      permissions,
     );
   }
 }

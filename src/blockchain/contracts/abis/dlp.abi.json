@@ -2,34 +2,18 @@
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "contributorAddress",
-        "type": "address"
-      },
-      {
-        "internalType": "string",
-        "name": "contributionId",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "proofHash",
-        "type": "string"
+        "internalType": "uint256",
+        "name": "fileId",
+        "type": "uint256"
       },
       {
         "internalType": "uint256",
-        "name": "rewardAmount",
+        "name": "proofIndex",
         "type": "uint256"
       }
     ],
     "name": "requestReward",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "success",
-        "type": "bool"
-      }
-    ],
+    "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   }

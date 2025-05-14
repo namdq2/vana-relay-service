@@ -8,14 +8,8 @@ export interface ITeePoolContract {
   /**
    * Requests a contribution proof from the TEE Pool
    *
-   * @param contributorAddress - Address of the contributor requesting the proof
-   * @param dataId - Identifier of the data being contributed
-   * @param contributionHash - Hash of the contribution data
+   * @param fileId - ID of the file in the Data Registry
    * @returns Transaction hash
    */
-  requestContributionProof(
-    contributorAddress: string,
-    dataId: string,
-    contributionHash: string,
-  ): Promise<string>;
+  requestContributionProof(fileId: number): Promise<string>;
 }

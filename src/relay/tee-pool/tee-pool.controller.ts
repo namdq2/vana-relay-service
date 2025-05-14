@@ -40,11 +40,7 @@ export class TeePoolController {
         metadata: {
           type: 'object',
           properties: {
-            contributorAddress: {
-              type: 'string',
-              example: '0xabcdef1234567890abcdef1234567890abcdef12',
-            },
-            dataId: { type: 'string', example: 'data123' },
+            fileId: { type: 'number', example: 1 },
           },
         },
       },
@@ -64,9 +60,7 @@ export class TeePoolController {
     try {
       const transactionHash =
         await this.teePoolContractService.requestContributionProof(
-          requestProofDto.contributorAddress,
-          requestProofDto.dataId,
-          requestProofDto.contributionHash,
+          requestProofDto.fileId,
         );
 
       return {
@@ -74,8 +68,7 @@ export class TeePoolController {
         status: 'success',
         timestamp: new Date().toISOString(),
         metadata: {
-          contributorAddress: requestProofDto.contributorAddress,
-          dataId: requestProofDto.dataId,
+          fileId: requestProofDto.fileId,
         },
       };
     } catch (error) {

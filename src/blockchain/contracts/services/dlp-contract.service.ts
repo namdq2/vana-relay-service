@@ -43,28 +43,15 @@ export class DlpContractService
   /**
    * Requests a reward for a data labeling contribution
    *
-   * @param contributorAddress - Address of the contributor requesting the reward
-   * @param contributionId - Identifier of the contribution
-   * @param proofHash - Hash of the proof of contribution
-   * @param rewardAmount - Amount of tokens to be rewarded
+   * @param fileId - ID of the file in the Data Registry
+   * @param proofIndex - Index of the proof in the contract
    * @returns Transaction hash
    */
-  async requestReward(
-    contributorAddress: string,
-    contributionId: string,
-    proofHash: string,
-    rewardAmount: string,
-  ): Promise<string> {
+  async requestReward(fileId: number, proofIndex: number): Promise<string> {
     this.logger.log(
-      `Requesting reward of ${rewardAmount} for contributor ${contributorAddress} and contribution ${contributionId}`,
+      `Requesting reward for file ID ${fileId} with proof index ${proofIndex}`,
     );
 
-    return this.sendTransaction(
-      'requestReward',
-      contributorAddress,
-      contributionId,
-      proofHash,
-      rewardAmount,
-    );
+    return this.sendTransaction('requestReward', fileId, proofIndex);
   }
 }

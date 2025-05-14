@@ -39,12 +39,8 @@ export class DlpController {
         metadata: {
           type: 'object',
           properties: {
-            contributorAddress: {
-              type: 'string',
-              example: '0xabcdef1234567890abcdef1234567890abcdef12',
-            },
-            contributionId: { type: 'string', example: 'contrib123' },
-            rewardAmount: { type: 'string', example: '100000000000000000' },
+            fileId: { type: 'number', example: 1 },
+            proofIndex: { type: 'number', example: 0 },
           },
         },
       },
@@ -63,10 +59,8 @@ export class DlpController {
   ): Promise<TransactionResponse> {
     try {
       const transactionHash = await this.dlpContractService.requestReward(
-        requestRewardDto.contributorAddress,
-        requestRewardDto.contributionId,
-        requestRewardDto.proofHash,
-        requestRewardDto.rewardAmount,
+        requestRewardDto.fileId,
+        requestRewardDto.proofIndex,
       );
 
       return {
@@ -74,9 +68,8 @@ export class DlpController {
         status: 'success',
         timestamp: new Date().toISOString(),
         metadata: {
-          contributorAddress: requestRewardDto.contributorAddress,
-          contributionId: requestRewardDto.contributionId,
-          rewardAmount: requestRewardDto.rewardAmount,
+          fileId: requestRewardDto.fileId,
+          proofIndex: requestRewardDto.proofIndex,
         },
       };
     } catch (error) {
