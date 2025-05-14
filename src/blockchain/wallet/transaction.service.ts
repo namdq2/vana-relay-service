@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { ethers } from 'ethers';
 import { WalletService } from './wallet.service';
 import { BlockchainModuleConfig } from '../config/blockchain-config.type';
+import { TransactionLogRepository } from '../infrastructure/persistence/relational/repositories/transaction-log.repository';
 
 /**
  * Service for handling blockchain transactions
@@ -20,6 +21,7 @@ export class TransactionService {
   constructor(
     private readonly configService: ConfigService,
     private readonly walletService: WalletService,
+    private readonly transactionLogRepository: TransactionLogRepository,
   ) {
     this.initializeProvider();
   }
@@ -97,6 +99,23 @@ export class TransactionService {
 
       // Store pending transaction
       this.pendingTransactions.set(txResponse.hash, txResponse);
+
+      // Create initial transaction log
+      await this.transactionLogRepository.create({
+        transactionHash: txResponse.hash,
+        status: 'pending',
+        from: wallet.address,
+        to,
+        data,
+        value,
+        chainId: config.blockchain.chainId,
+        metadata: {
+          nonce,
+          gasLimit: config.wallet.gasLimit,
+          maxFeePerGas: maxFeePerGas.toString(),
+          maxPriorityFeePerGas: maxPriorityFeePerGas.toString(),
+        },
+      });
 
       // Wait for transaction confirmation in the background
       const txResult = await this.waitForConfirmation(txResponse.hash);
@@ -317,6 +336,13 @@ export class TransactionService {
       this.logger.log(
         `Transaction ${txHash} confirmed in block ${receipt.blockNumber}`,
       );
+
+      // Update transaction log with success status
+      await this.transactionLogRepository.update(txHash, {
+        status: 'success',
+        blockNumber: receipt.blockNumber,
+      });
+
       return {
         success: true,
         receipt,
@@ -329,6 +355,12 @@ export class TransactionService {
 
       // Extract and return the revert reason
       const revertReason = this.extractRevertReason(error);
+
+      // Update transaction log with failure status
+      await this.transactionLogRepository.update(txHash, {
+        status: 'failed',
+        error: revertReason,
+      });
 
       // Return failure status with error message
       return {
