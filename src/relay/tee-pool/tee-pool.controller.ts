@@ -61,15 +61,8 @@ export class TeePoolController {
     @Body() requestProofDto: RequestProofDto,
   ): Promise<TransactionResponse> {
     try {
-      const transactionHash =
-        await this.teePoolContractService.requestContributionProof(
-          requestProofDto.fileId,
-          requestProofDto.teeFee,
-        );
-
-      // Store transaction in the database
-      const transaction = await this.transactionService.create({
-        transactionHash,
+      // Prepare common transaction data
+      const transactionData = {
         method: 'requestContributionProof',
         chainId: Number(this.teePoolContractService.getChainId()),
         parameters: {
@@ -79,17 +72,50 @@ export class TeePoolController {
         metadata: {
           fileId: requestProofDto.fileId,
           teeFee: requestProofDto.teeFee,
-        },
+        } as Record<string, any>,
         transactionState: TransactionStatus.PENDING,
+      };
+      const transaction = await this.transactionService.create(transactionData);
+
+      let transactionHash: string | null = null;
+
+      // Try to call the contract method
+      try {
+        transactionHash =
+          await this.teePoolContractService.requestContributionProof(
+            requestProofDto.fileId,
+            requestProofDto.teeFee,
+          );
+      } catch (contractError) {
+        // Contract call failed, update transaction data
+        await this.transactionService.update(transaction.id, {
+          transactionHash,
+          transactionState: TransactionStatus.FAILED,
+          errorMessage: contractError?.message,
+        });
+        throw new HttpException(
+          `Failed to request contribution proof: ${contractError.message}`,
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+
+      // Store transaction in the database
+      await this.transactionService.update(transaction.id, {
+        transactionHash,
+        transactionState: TransactionStatus.SUCCESS,
       });
 
+      // Return standardized response
       return {
-        transactionHash: transactionHash,
+        transactionHash,
         status: transaction.transactionState,
         timestamp: transaction.createdAt.toISOString(),
         metadata: transaction.metadata,
       };
     } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
       throw new HttpException(
         `Failed to request contribution proof: ${error.message}`,
         HttpStatus.INTERNAL_SERVER_ERROR,

@@ -63,14 +63,8 @@ export class DlpController {
     @Body() requestRewardDto: RequestRewardDto,
   ): Promise<TransactionResponse> {
     try {
-      const transactionHash = await this.dlpContractService.requestReward(
-        requestRewardDto.fileId,
-        requestRewardDto.proofIndex,
-      );
-
       // Store transaction in the database
       const transaction = await this.transactionService.create({
-        transactionHash,
         method: 'requestReward',
         chainId: Number(this.dlpContractService.getChainId()),
         parameters: {
@@ -84,6 +78,31 @@ export class DlpController {
         transactionState: TransactionStatus.PENDING,
       });
 
+      let transactionHash: string | null = null;
+
+      try {
+        transactionHash = await this.dlpContractService.requestReward(
+          requestRewardDto.fileId,
+          requestRewardDto.proofIndex,
+        );
+      } catch (contractError) {
+        // Contract call failed, update transaction data
+        await this.transactionService.update(transaction.id, {
+          transactionHash,
+          transactionState: TransactionStatus.FAILED,
+          errorMessage: contractError?.message,
+        });
+        throw new HttpException(
+          `Failed to request reward: ${contractError.message}`,
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+
+      await this.transactionService.update(transaction.id, {
+        transactionHash,
+        transactionState: TransactionStatus.SUCCESS,
+      });
+
       return {
         transactionHash: transactionHash,
         status: transaction.transactionState,
@@ -91,6 +110,9 @@ export class DlpController {
         metadata: transaction.metadata,
       };
     } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
       throw new HttpException(
         `Failed to request reward: ${error.message}`,
         HttpStatus.INTERNAL_SERVER_ERROR,

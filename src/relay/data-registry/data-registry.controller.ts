@@ -62,16 +62,7 @@ export class DataRegistryController {
   })
   async addFile(@Body() addFileDto: AddFileDto): Promise<TransactionResponse> {
     try {
-      const transactionHash =
-        await this.dataRegistryContractService.addFileWithPermissions(
-          addFileDto.url,
-          addFileDto.ownerAddress,
-          addFileDto.permissions,
-        );
-
-      // Store transaction in the database
-      const transaction = await this.transactionService.create({
-        transactionHash,
+      const transactionData = {
         method: 'addFileWithPermissions',
         chainId: Number(this.dataRegistryContractService.getChainId()),
         parameters: {
@@ -84,15 +75,46 @@ export class DataRegistryController {
           permissionsCount: addFileDto.permissions.length,
         },
         transactionState: TransactionStatus.PENDING,
+      };
+
+      const transaction = await this.transactionService.create(transactionData);
+
+      let transactionHash: string | null = null;
+
+      try {
+        transactionHash =
+          await this.dataRegistryContractService.addFileWithPermissions(
+            addFileDto.url,
+            addFileDto.ownerAddress,
+            addFileDto.permissions,
+          );
+      } catch (contractError) {
+        await this.transactionService.update(transaction.id, {
+          transactionHash,
+          transactionState: TransactionStatus.FAILED,
+          errorMessage: contractError?.message,
+        });
+        throw new HttpException(
+          `Failed to add file to registry: ${contractError.message}`,
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+
+      await this.transactionService.update(transaction.id, {
+        transactionHash,
+        transactionState: TransactionStatus.SUCCESS,
       });
 
       return {
-        transactionHash: transactionHash,
+        transactionHash,
         status: transaction.transactionState,
         timestamp: transaction.createdAt.toISOString(),
         metadata: transaction.metadata,
       };
     } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
       throw new HttpException(
         `Failed to add file to registry: ${error.message}`,
         HttpStatus.INTERNAL_SERVER_ERROR,

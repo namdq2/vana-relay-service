@@ -106,7 +106,8 @@ export class WalletService implements OnModuleInit {
               const walletId = key.replace(prefix, '');
               const privateKey = process.env[key];
 
-              if (privateKey && ethers.utils.isHexString(privateKey)) {
+              // if (privateKey && ethers.utils.isHexString(privateKey)) {
+              if (privateKey) {
                 if (!this.walletExists(walletId)) {
                   await this.storeWallet(walletId, privateKey);
                   walletCount++;
@@ -214,8 +215,8 @@ export class WalletService implements OnModuleInit {
    */
   async getAvailableWallet(
     provider?: ethers.providers.Provider,
-    maxAttempts = 5,
-    retryDelay = 200,
+    maxAttempts = 15,
+    retryDelay = 1000,
   ): Promise<{ walletId: string; wallet: ethers.Wallet } | null> {
     if (this.walletPool.length === 0) {
       this.logger.warn('No wallets available in the pool');

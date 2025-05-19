@@ -104,6 +104,9 @@ export class TransactionService {
       const txResponse = await wallet.sendTransaction(tx);
       this.logger.log(`Transaction sent: ${txResponse.hash}`);
 
+      // Release the wallet back to the pool
+      this.walletService.releaseWallet(walletId);
+
       // Store pending transaction
       this.pendingTransactions.set(txResponse.hash, txResponse);
 
@@ -118,10 +121,6 @@ export class TransactionService {
           this.logger.error(
             `Error in transaction confirmation: ${error.message}`,
           );
-        })
-        .finally(() => {
-          // Always release the wallet back to the pool
-          this.walletService.releaseWallet(walletId);
         });
 
       return txResponse.hash;
