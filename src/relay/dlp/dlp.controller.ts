@@ -9,11 +9,15 @@ import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { DlpContractService } from '../../blockchain/contracts/services';
 import { RequestRewardDto } from './dto';
 import { TransactionResponse } from '../common/interfaces';
+import { TransactionService } from '../common/services/transaction.service';
 
 @ApiTags('DLP')
 @Controller('relay/dlp')
 export class DlpController {
-  constructor(private readonly dlpContractService: DlpContractService) {}
+  constructor(
+    private readonly dlpContractService: DlpContractService,
+    private readonly transactionService: TransactionService,
+  ) {}
 
   @Post('request-reward')
   @ApiOperation({
@@ -63,15 +67,23 @@ export class DlpController {
         requestRewardDto.proofIndex,
       );
 
-      return {
+      // Store transaction in the database
+      const transaction = await this.transactionService.createTransaction(
         transactionHash,
-        status: 'success',
-        timestamp: new Date().toISOString(),
-        metadata: {
+        'requestReward',
+        Number(this.dlpContractService.getChainId()),
+        {
           fileId: requestRewardDto.fileId,
           proofIndex: requestRewardDto.proofIndex,
         },
-      };
+        {
+          fileId: requestRewardDto.fileId,
+          proofIndex: requestRewardDto.proofIndex,
+        },
+      );
+
+      // Convert to response
+      return this.transactionService.transactionToResponse(transaction);
     } catch (error) {
       throw new HttpException(
         `Failed to request reward: ${error.message}`,

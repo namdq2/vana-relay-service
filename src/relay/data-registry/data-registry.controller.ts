@@ -9,12 +9,14 @@ import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { DataRegistryContractService } from '../../blockchain/contracts/services';
 import { AddFileDto } from './dto';
 import { TransactionResponse } from '../common/interfaces';
+import { TransactionService } from '../common/services/transaction.service';
 
 @ApiTags('Data Registry')
 @Controller('relay/data-registry')
 export class DataRegistryController {
   constructor(
     private readonly dataRegistryContractService: DataRegistryContractService,
+    private readonly transactionService: TransactionService,
   ) {}
 
   @Post('add-file-with-permissions')
@@ -66,15 +68,24 @@ export class DataRegistryController {
           addFileDto.permissions,
         );
 
-      return {
+      // Store transaction in the database
+      const transaction = await this.transactionService.createTransaction(
         transactionHash,
-        status: 'success',
-        timestamp: new Date().toISOString(),
-        metadata: {
+        'addFileWithPermissions',
+        Number(this.dataRegistryContractService.getChainId()),
+        {
+          url: addFileDto.url,
+          ownerAddress: addFileDto.ownerAddress,
+          permissions: addFileDto.permissions,
+        },
+        {
           url: addFileDto.url,
           permissionsCount: addFileDto.permissions.length,
         },
-      };
+      );
+
+      // Convert to response
+      return this.transactionService.transactionToResponse(transaction);
     } catch (error) {
       throw new HttpException(
         `Failed to add file to registry: ${error.message}`,

@@ -17,6 +17,7 @@ export abstract class BaseContractService implements OnModuleInit {
   protected wallet: ethers.Wallet;
   protected contract: ethers.Contract;
   protected useWalletPool = false;
+  protected chainId: number;
 
   protected constructor(
     protected readonly configService: ConfigService,
@@ -40,6 +41,11 @@ export abstract class BaseContractService implements OnModuleInit {
       this.useWalletPool = true;
       this.logger.log('Contract service configured to use wallet pool');
     }
+
+    // Store chain ID
+    if (config) {
+      this.chainId = config.blockchain.chainId;
+    }
   }
 
   /**
@@ -60,6 +66,14 @@ export abstract class BaseContractService implements OnModuleInit {
     this.logger.log(
       `Provider initialized for network: ${config.blockchain.network}`,
     );
+  }
+
+  /**
+   * Get the chain ID for the current blockchain
+   * @returns The chain ID as a number
+   */
+  public getChainId(): number {
+    return this.chainId;
   }
 
   /**

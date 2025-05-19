@@ -9,12 +9,14 @@ import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { TeePoolContractService } from '../../blockchain/contracts/services';
 import { RequestProofDto } from './dto';
 import { TransactionResponse } from '../common/interfaces';
+import { TransactionService } from '../common/services/transaction.service';
 
 @ApiTags('TEE Pool')
 @Controller('relay/tee-pool')
 export class TeePoolController {
   constructor(
     private readonly teePoolContractService: TeePoolContractService,
+    private readonly transactionService: TransactionService,
   ) {}
 
   @Post('request-contribution-proof')
@@ -64,15 +66,23 @@ export class TeePoolController {
           requestProofDto.teeFee,
         );
 
-      return {
+      // Store transaction in the database
+      const transaction = await this.transactionService.createTransaction(
         transactionHash,
-        status: 'success',
-        timestamp: new Date().toISOString(),
-        metadata: {
+        'requestContributionProof',
+        Number(this.teePoolContractService.getChainId()),
+        {
           fileId: requestProofDto.fileId,
           teeFee: requestProofDto.teeFee,
         },
-      };
+        {
+          fileId: requestProofDto.fileId,
+          teeFee: requestProofDto.teeFee,
+        },
+      );
+
+      // Convert to response
+      return this.transactionService.transactionToResponse(transaction);
     } catch (error) {
       throw new HttpException(
         `Failed to request contribution proof: ${error.message}`,
