@@ -9,14 +9,15 @@ import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { TeePoolContractService } from '../../blockchain/contracts/services';
 import { RequestProofDto } from './dto';
 import { TransactionResponse } from '../common/interfaces';
-import { TransactionService } from '../common/services/transaction.service';
+import { TransactionsService } from '../../transactions/transactions.service';
+import { TransactionStatus } from '../../transactions/domain/transaction.status';
 
 @ApiTags('TEE Pool')
 @Controller('relay/tee-pool')
 export class TeePoolController {
   constructor(
     private readonly teePoolContractService: TeePoolContractService,
-    private readonly transactionService: TransactionService,
+    private readonly transactionService: TransactionsService,
   ) {}
 
   @Post('request-contribution-proof')
@@ -67,22 +68,27 @@ export class TeePoolController {
         );
 
       // Store transaction in the database
-      const transaction = await this.transactionService.createTransaction(
+      const transaction = await this.transactionService.create({
         transactionHash,
-        'requestContributionProof',
-        Number(this.teePoolContractService.getChainId()),
-        {
+        method: 'requestContributionProof',
+        chainId: Number(this.teePoolContractService.getChainId()),
+        parameters: {
           fileId: requestProofDto.fileId,
           teeFee: requestProofDto.teeFee,
         },
-        {
+        metadata: {
           fileId: requestProofDto.fileId,
           teeFee: requestProofDto.teeFee,
         },
-      );
+        transactionState: TransactionStatus.PENDING,
+      });
 
-      // Convert to response
-      return this.transactionService.transactionToResponse(transaction);
+      return {
+        transactionHash: transactionHash,
+        status: transaction.transactionState,
+        timestamp: transaction.createdAt.toISOString(),
+        metadata: transaction.metadata,
+      };
     } catch (error) {
       throw new HttpException(
         `Failed to request contribution proof: ${error.message}`,

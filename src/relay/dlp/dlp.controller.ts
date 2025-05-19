@@ -9,14 +9,15 @@ import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { DlpContractService } from '../../blockchain/contracts/services';
 import { RequestRewardDto } from './dto';
 import { TransactionResponse } from '../common/interfaces';
-import { TransactionService } from '../common/services/transaction.service';
+import { TransactionsService } from '../../transactions/transactions.service';
+import { TransactionStatus } from '../../transactions/domain/transaction.status';
 
 @ApiTags('DLP')
 @Controller('relay/dlp')
 export class DlpController {
   constructor(
     private readonly dlpContractService: DlpContractService,
-    private readonly transactionService: TransactionService,
+    private readonly transactionService: TransactionsService,
   ) {}
 
   @Post('request-reward')
@@ -68,22 +69,27 @@ export class DlpController {
       );
 
       // Store transaction in the database
-      const transaction = await this.transactionService.createTransaction(
+      const transaction = await this.transactionService.create({
         transactionHash,
-        'requestReward',
-        Number(this.dlpContractService.getChainId()),
-        {
+        method: 'requestReward',
+        chainId: Number(this.dlpContractService.getChainId()),
+        parameters: {
           fileId: requestRewardDto.fileId,
           proofIndex: requestRewardDto.proofIndex,
         },
-        {
+        metadata: {
           fileId: requestRewardDto.fileId,
           proofIndex: requestRewardDto.proofIndex,
         },
-      );
+        transactionState: TransactionStatus.PENDING,
+      });
 
-      // Convert to response
-      return this.transactionService.transactionToResponse(transaction);
+      return {
+        transactionHash: transactionHash,
+        status: transaction.transactionState,
+        timestamp: transaction.createdAt.toISOString(),
+        metadata: transaction.metadata,
+      };
     } catch (error) {
       throw new HttpException(
         `Failed to request reward: ${error.message}`,
