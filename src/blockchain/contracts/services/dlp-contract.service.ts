@@ -52,6 +52,6 @@ export class DlpContractService
       `Requesting reward for file ID ${fileId} with proof index ${proofIndex}`,
     );
 
-    return this.sendTransaction('requestReward', fileId, proofIndex);
+    return this.sendTransaction('requestReward', '0', fileId, proofIndex);
   }
 }

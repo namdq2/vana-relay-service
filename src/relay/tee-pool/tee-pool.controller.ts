@@ -61,6 +61,7 @@ export class TeePoolController {
       const transactionHash =
         await this.teePoolContractService.requestContributionProof(
           requestProofDto.fileId,
+          requestProofDto.teeFee,
         );
 
       return {
@@ -69,6 +70,7 @@ export class TeePoolController {
         timestamp: new Date().toISOString(),
         metadata: {
           fileId: requestProofDto.fileId,
+          teeFee: requestProofDto.teeFee,
         },
       };
     } catch (error) {

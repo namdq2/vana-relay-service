@@ -44,11 +44,19 @@ export class TeePoolContractService
    * Requests a contribution proof from the TEE Pool
    *
    * @param fileId - ID of the file in the Data Registry
+   * @param teeFee - Tee fee in wei
    * @returns Transaction hash
    */
-  async requestContributionProof(fileId: number): Promise<string> {
+  async requestContributionProof(
+    fileId: number,
+    teeFee: string,
+  ): Promise<string> {
     this.logger.log(`Requesting contribution proof for file ID: ${fileId}`);
 
-    return this.sendTransaction('requestContributionProof', fileId);
+    return this.sendTransaction(
+      'requestContributionProof',
+      teeFee.toString(),
+      fileId,
+    );
   }
 }

@@ -1,4 +1,4 @@
-import { IsNumber, IsPositive } from 'class-validator';
+import { IsNumber, IsPositive, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
@@ -15,4 +15,12 @@ export class RequestProofDto {
   @IsPositive()
   @Type(() => Number)
   fileId: number;
+
+  @ApiProperty({
+    description: 'Tee fee in wei',
+    example: 10000000000000000,
+    type: String,
+  })
+  @IsString()
+  teeFee: string;
 }

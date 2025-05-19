@@ -59,6 +59,7 @@ export class DataRegistryContractService
 
     return this.sendTransaction(
       'addFileWithPermissions',
+      '0',
       url,
       ownerAddress,
       permissions,

@@ -122,6 +122,7 @@ export abstract class BaseContractService implements OnModuleInit {
    */
   protected async sendTransaction(
     method: string,
+    value: string = '0',
     ...args: any[]
   ): Promise<string> {
     try {
@@ -139,7 +140,7 @@ export abstract class BaseContractService implements OnModuleInit {
         'default', // Use the default wallet
         to,
         data,
-        '0', // No value to send
+        value, // Value to send
         'medium', // Medium priority
       );
 
